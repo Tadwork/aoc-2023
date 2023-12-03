@@ -11,34 +11,42 @@ numbers = [
     'nine',
 ]
 
-# reverse_nums = list(map(reversed,numbers))
+def find_number(line: str,number_list):
+    """
+    return the first number found in the line
+    which is either a spelled out number or a literal number
 
-def find_number(line,start,end,direction = 1):
-    for loc in range(start,end,direction):
-        if line[loc].isnumeric():
-            return line[loc]
-        for i,num in enumerate(numbers):
-            if direction == 1:
-                if num in line[start:loc+1]:
-                    return str(i)
-            else:
-                if num in line[loc:start+1]:
-                    return str(i)
+    Args:
+        line (str): a string of text that contains a number or spelled out number
+        number_list (list): a list of spelled out numbers
+
+    Returns:
+        str: the number found in the line as a string
+    """
+    for i,char in enumerate(line):
+        if char.isnumeric():
+            return char
+        for n,num in enumerate(number_list):
+            if line[:i+1].endswith(num):
+                return str(n)
 
 def read_calibration_document_and_return_sum(document:str):
     """
     The newly-improved calibration document consists of lines of text; 
     each line originally contained a specific calibration value that the Elves now need to recover. 
-    On each line, the calibration value can be found by combining the first digit and the last digit (in that order) to form a single two-digit number.
+    On each line, the calibration value can be found by combining the first digit 
+    and the last digit (in that order) to form a single two-digit number.
     """
     total = 0
     for line in document.split('\n'):
         stripped = line.strip()
         if not stripped:
             continue
-        end = len(stripped)
-        start_num = find_number(stripped,0,end)
-        end_num = find_number(stripped,end-1,-1,-1)
+        start_num = find_number(stripped,numbers)
+        # reverse the spelled out numbers
+        reverse_nums = list(map(lambda n: n[::-1],numbers))
+        # check for the first occurrence of a spelled out number or literal number
+        end_num = find_number(stripped[::-1],reverse_nums)
         total += int(start_num + end_num)
     return total
 
