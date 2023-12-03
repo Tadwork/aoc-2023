@@ -1,6 +1,6 @@
 import pytest
 
-from main import read_calibration_document_and_return_sum
+from day1 import read_calibration_document_and_return_sum
 
 def test_replaces_spelled_with_number():
     assert read_calibration_document_and_return_sum('1zero') == 10
