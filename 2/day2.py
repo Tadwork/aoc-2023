@@ -44,47 +44,49 @@
 
 # For each game, find the minimum set of cubes that must have been present. What is the sum of the power of these sets?
 
+from dataclasses import dataclass
 
+@dataclass
+class Game:
+    red: int = 0
+    green: int = 0
+    blue: int = 0
+    
+    def is_valid(self, possible_colors) -> bool:
+        return self.red <= possible_colors.red and self.green <= possible_colors.green and self.blue <= possible_colors.blue
 
-def get_cubes_for_turn(turn:str) -> dict:
-    cubes = {
-        'red': 0,
-        'green': 0,
-        'blue': 0
-    }
+def get_cubes_for_turn(turn:str) -> Game:
+    cubes = Game()
     for cube in turn.split(','):
         count, color = cube.strip().split(' ')
-        cubes[color] = int(count)
+        setattr(cubes,color,int(count))
     return cubes
 
-def is_possible_game(turns:list, max_colors:dict) -> bool:
-    cubes_used = {
-        'red': 0,
-        'green': 0,
-        'blue': 0
-    }
+def is_possible_game(turns:list, possible_game:Game) -> (bool, Game):
+    cubes_used = Game()
     is_valid = True
     for turn in turns:
         cubes = get_cubes_for_turn(turn)
-        if cubes['red'] > max_colors['red'] or cubes['green'] > max_colors['green'] or cubes['blue'] > max_colors['blue']:
+        if not cubes.is_valid(possible_game):
             is_valid = False
-        cubes_used['red'] = max(cubes['red'], cubes_used['red'])
-        cubes_used['blue'] = max(cubes['blue'], cubes_used['blue'])
-        cubes_used['green'] = max(cubes['green'], cubes_used['green'])
+        cubes_used.red = max(cubes.red, cubes_used.red)
+        cubes_used.blue = max(cubes.blue, cubes_used.blue)
+        cubes_used.green = max(cubes.green, cubes_used.green)
     return is_valid, cubes_used
 
-def sum_and_power_of_possible_games(games:str, max_colors:dict) -> int:
+def sum_and_power_of_possible_games(games:str, possible_game:Game) -> int:
     total_power = 0
     total = 0
     for game in games.split('\n'):
         if not game:
             continue
         game_id, turns = game.split(':')
+        # skip the first 5 characters which always contain 'Game '
         game_id = int(game_id[5:])
-        is_valid, cubes_used = is_possible_game(turns.split(';'), max_colors)
+        is_valid, cubes_used = is_possible_game(turns.split(';'), possible_game)
         if is_valid:
             total += game_id
-        total_power+=cubes_used['red'] * cubes_used['blue'] * cubes_used['green']
+        total_power+=cubes_used.red * cubes_used.blue * cubes_used.green
     return total, total_power
 
 games = """
@@ -193,11 +195,7 @@ if __name__ == '__main__':
     
     # Determine which games would have been possible if the bag had been loaded with only 12 red cubes, 13 green cubes, and 14 blue cubes. 
     # What is the sum of the IDs of those games?
-    # waht is the power of the bag?
-    max_colors = {
-        'red': 12,
-        'green': 13,
-        'blue': 14
-    }
+    # what is the power of the bag?
+    max_colors = Game(red=12,green=13,blue=14 )
     print(sum_and_power_of_possible_games(games, max_colors))
     
