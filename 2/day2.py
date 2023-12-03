@@ -1,3 +1,4 @@
+## Part 1
 # You're launched high into the atmosphere! The apex of your trajectory just barely reaches the surface of a large island floating in the sky. You gently land in a fluffy pile of leaves. It's quite cold, but you don't see much snow. An Elf runs over to greet you.
 
 # The Elf explains that you've arrived at Snow Island and apologizes for the lack of snow. He'll be happy to explain the situation, but it's a bit of a walk, so you have some time. They don't get many visitors up here; would you like to play a game in the meantime?
@@ -21,6 +22,29 @@
 
 # In the example above, games 1, 2, and 5 would have been possible if the bag had been loaded with that configuration. However, game 3 would have been impossible because at one point the Elf showed you 20 red cubes at once; similarly, game 4 would also have been impossible because the Elf showed you 15 blue cubes at once. If you add up the IDs of the games that would have been possible, you get 8.
 
+## part 2
+
+# The Elf says they've stopped producing snow because they aren't getting any water! He isn't sure why the water stopped; however, he can show you how to get to the water source to check it out for yourself. It's just up ahead!
+
+# As you continue your walk, the Elf poses a second question: in each game you played, what is the fewest number of cubes of each color that could have been in the bag to make the game possible?
+
+# Again consider the example games from earlier:
+
+# Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+# Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+# Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+# Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+# Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
+# In game 1, the game could have been played with as few as 4 red, 2 green, and 6 blue cubes. If any color had even one fewer cube, the game would have been impossible.
+# Game 2 could have been played with a minimum of 1 red, 3 green, and 4 blue cubes.
+# Game 3 must have been played with at least 20 red, 13 green, and 6 blue cubes.
+# Game 4 required at least 14 red, 3 green, and 15 blue cubes.
+# Game 5 needed no fewer than 6 red, 3 green, and 2 blue cubes in the bag.
+# The power of a set of cubes is equal to the numbers of red, green, and blue cubes multiplied together. The power of the minimum set of cubes in game 1 is 48. In games 2-5 it was 12, 1560, 630, and 36, respectively. Adding up these five powers produces the sum 2286.
+
+# For each game, find the minimum set of cubes that must have been present. What is the sum of the power of these sets?
+
+
 
 def get_cubes_for_turn(turn:str) -> dict:
     cubes = {
@@ -34,23 +58,34 @@ def get_cubes_for_turn(turn:str) -> dict:
     return cubes
 
 def is_possible_game(turns:list, max_colors:dict) -> bool:
+    cubes_used = {
+        'red': 0,
+        'green': 0,
+        'blue': 0
+    }
+    is_valid = True
     for turn in turns:
         cubes = get_cubes_for_turn(turn)
         if cubes['red'] > max_colors['red'] or cubes['green'] > max_colors['green'] or cubes['blue'] > max_colors['blue']:
-            return False
-    return True
+            is_valid = False
+        cubes_used['red'] = max(cubes['red'], cubes_used['red'])
+        cubes_used['blue'] = max(cubes['blue'], cubes_used['blue'])
+        cubes_used['green'] = max(cubes['green'], cubes_used['green'])
+    return is_valid, cubes_used
 
-def sum_ids_of_possible_games(games:str, max_colors:dict) -> int:
+def sum_and_power_of_possible_games(games:str, max_colors:dict) -> int:
+    total_power = 0
     total = 0
     for game in games.split('\n'):
         if not game:
             continue
         game_id, turns = game.split(':')
-        print(game_id, turns)
         game_id = int(game_id[5:])
-        if is_possible_game(turns.split(';'), max_colors):
+        is_valid, cubes_used = is_possible_game(turns.split(';'), max_colors)
+        if is_valid:
             total += game_id
-    return total
+        total_power+=cubes_used['red'] * cubes_used['blue'] * cubes_used['green']
+    return total, total_power
 
 games = """
 Game 1: 10 red, 7 green, 3 blue; 5 blue, 3 red, 10 green; 4 blue, 14 green, 7 red; 1 red, 11 green; 6 blue, 17 green, 15 red; 18 green, 7 red, 5 blue
@@ -156,11 +191,13 @@ Game 100: 16 red, 3 blue; 2 red, 5 green; 9 red; 1 blue, 3 green, 10 red; 1 red,
 """
 if __name__ == '__main__':
     
-    # Determine which games would have been possible if the bag had been loaded with only 12 red cubes, 13 green cubes, and 14 blue cubes. What is the sum of the IDs of those games?
+    # Determine which games would have been possible if the bag had been loaded with only 12 red cubes, 13 green cubes, and 14 blue cubes. 
+    # What is the sum of the IDs of those games?
+    # waht is the power of the bag?
     max_colors = {
         'red': 12,
         'green': 13,
         'blue': 14
     }
-    print(sum_ids_of_possible_games(games, max_colors))
+    print(sum_and_power_of_possible_games(games, max_colors))
     
