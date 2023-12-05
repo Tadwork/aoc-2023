@@ -20,6 +20,7 @@ class Almanac:
     light_to_temperature = InstructionRange()
     temperature_to_humidity = InstructionRange()
     humidity_to_location = InstructionRange()
+    
     def __init__(self, input:str) -> None:
         lines = input.splitlines()
         line_num = 0
@@ -29,8 +30,10 @@ class Almanac:
                 line_num+=1
                 continue
             if line.startswith('seeds:'):
-                seed_list = line.split(':')[1].strip()
-                self.seeds = [int(s) for s in seed_list.split()]
+                seed_list = line.split(':')[1].strip().split()
+                seed_iter = iter(seed_list)
+                for seed in seed_iter:
+                    self.seeds.append({ 'seed':int(seed), 'length':int(next(seed_iter))})
             elif 'map' in line:
                 property_name = line.split()[0].replace('-','_')
                 prop = getattr(self,property_name)
@@ -51,9 +54,14 @@ class Almanac:
         location = self.humidity_to_location.get(humidity)
         return location
     
+    def find_min_location(self):
+        locations = []
+        for seed in self.seeds:
+            for seed_location in range(seed['seed'],seed['seed']+seed['length']):
+                locations.append(self.get_location(seed_location))
+        return min(locations)
+    
 if __name__ == '__main__':
     with open('5/almanac.txt',mode='r', encoding='utf-8') as f:
         almanac = Almanac(f.read())
-        min_location = min([almanac.get_location(seed) for seed in almanac.seeds])
-        print(len(almanac.seeds))
-        print(min_location)
+        print(almanac.find_min_location())

@@ -46,7 +46,7 @@ class TestAlmanac:
         50 98 2
         """
         almanac = day5.Almanac(input)
-        assert almanac.seeds == [79,14,55,13]
+        assert almanac.seeds == [{'seed':79,'length':14},{'seed':55,'length':13}]
         assert almanac.seed_to_soil.get(98) == 50
         
     def test_get_location(self):
